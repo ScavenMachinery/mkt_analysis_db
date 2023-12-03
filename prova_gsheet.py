@@ -499,19 +499,35 @@ if password_input:
                 with F:
                     st.plotly_chart(fig_subcategory, use_container_width=True)
             
-                # Estrai i valori dalla colonna 'Product'
-                text = " ".join(descrizione for descrizione in nuova_tabella.Product if isinstance(descrizione, str))
+                
 
-                # Creazione della Word Cloud con una risoluzione maggiore
+                # Widget per la selezione del filtro
+                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Solo Top 10 Brand per Fatturato"])
+
+                # Preparazione del testo per la Word Cloud
+                if opzione_wc == "Solo Top 10 Brand per Fatturato":
+                    # Estrai i nomi dei top 10 brand
+                    top_10_brand_names = top_10_brands['Brand'].tolist()
+                    # Filtra nuova_tabella per i brand in top_10_brand_names
+                    filtered_nuova_tabella = nuova_tabella[nuova_tabella['Brand'].isin(top_10_brand_names)]
+                    text = " ".join(descrizione for descrizione in filtered_nuova_tabella.Product if isinstance(descrizione, str))
+                else:
+                    # Utilizza tutti i prodotti in nuova_tabella
+                    text = " ".join(descrizione for descrizione in nuova_tabella.Product if isinstance(descrizione, str))
+
+                # Creazione della Word Cloud
                 wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
 
                 # Visualizza la Word Cloud usando Matplotlib
-                plt.figure(figsize=(8, 4))  # Aumenta le dimensioni del plot
+                plt.figure(figsize=(10, 5))
                 plt.imshow(wordcloud, interpolation='bilinear')
                 plt.axis("off")
+                plt.show()
 
                 # Mostra la word cloud in Streamlit
-                st.pyplot(plt)
+                st.pyplot(plt)    
+
+
 
 
 
