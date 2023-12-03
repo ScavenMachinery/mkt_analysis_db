@@ -7,17 +7,24 @@ import plotly.graph_objects as go
 import plotly.subplots as sp
 from PIL import Image
 import datetime
+from streamlit_extras.metric_cards import style_metric_cards 
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
 
 
 img = Image.open('tondino3.png')
 image = Image.open('logo.bettershop.png')
+image_title =Image.open('bettershop_srls_cover.jpg')
 
 st.set_page_config(
         layout="wide",
         page_title='Market Analysis',
         page_icon=img)
 
-st.image(image, width=400)
+st.sidebar.image(image, width=250)
+
+st.image(image_title,use_column_width=True)
 
 st.title("ANALISI DI MERCATO 2 ANNI")
 st.markdown("_source.h v.1.0_")
@@ -41,7 +48,7 @@ password_input = st.sidebar.text_input("Inserisci la password", type="password")
 if password_input:
     if password_input == password_segreta:
         # Create a connection object.
-        conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+        conn = st.connection("gsheets", type=GSheetsConnection)
 
         # Chiedi all'utente il nome del foglio
         sheet_name = st.sidebar.text_input("Inserisci il nome del foglio:")
@@ -72,48 +79,41 @@ if password_input:
                 total_sum_fatturato = df_selezionato_fatturato['Somma'].sum()
                 total_sum_units = df_selezionato_units['Somma'].sum()
 
-                # CSS per centrare e formattare il contenuto nelle colonne
-                st.markdown("""
-                    <style>
-                    .centered {
-                        text-align: center;
-                    }
-                    .metric-title {
-                        font-size: 1em;
-                        margin-bottom: 5px;
-                        font-style: italic;
-                    }
-                    .metric-value {
-                        font-size: 3.5em;  /* Dimensione più grande per i valori */
-                        font-weight: normal; /* Rimuove il grassetto */
-                    }
-                    </style>
-                    """, unsafe_allow_html=True)
+                # Formattazione con il punto come separatore delle migliaia e la virgola per i decimali
+                formatted_total_sum_fatturato = "{:,.2f}".format(total_sum_fatturato).replace(",", "X").replace(".", ",").replace("X", ".")
+                formatted_total_sum_units = "{:,.0f}".format(total_sum_units).replace(",", "X").replace(".", ",").replace("X", ".")
 
-                # Creazione delle colonne per le metriche
-                col1, col2 = st.columns(2)
 
-                with col1:
-                    st.markdown(f"<div class='centered'><span class='metric-title'>Totale Fatturato</span><br><span class='metric-value'>€{total_sum_fatturato:,.2f}</span></div>", unsafe_allow_html=True)
-
-                with col2:
-                    st.markdown(f"<div class='centered'><span class='metric-title'>Totale Units</span><br><span class='metric-value'>{total_sum_units:,.2f}</span></div>", unsafe_allow_html=True)
-
-                
                 # Calcola il numero di valori univoci per ASIN e Brand
                 unique_asin_count = df['ASIN'].nunique()
                 unique_brand_count = df['Brand'].nunique()
+
+                # Creazione delle colonne per le metriche
+
+
+                def metrics():
+                    from streamlit_extras.metric_cards import style_metric_cards
+                    style_metric_cards(background_color="",border_left_color="#f8db0c")
+                metrics()
+
+                col1, col2 = st.columns(2)
+                with col1:    
+                    st.metric(label="Totale Fatturato",value=f"{formatted_total_sum_fatturato} €")
+                with col2:
+                    st.metric(label="Totale Units",value=formatted_total_sum_units)
+
 
                 st.write("\n\n\n\n")
 
                 col3, col4 = st.columns(2)
 
                 with col3:
-                    st.markdown(f"<div class='centered'><span class='metric-title'>ASIN</span><br><span class='metric-value'>{unique_asin_count}</span></div>", unsafe_allow_html=True)
+                    st.metric(label="ASIN",
+                              value=unique_asin_count)
 
                 with col4:
-                    st.markdown(f"<div class='centered'><span class='metric-title'>Brand</span><br><span class='metric-value'>{unique_brand_count}</span></div>", unsafe_allow_html=True)
-
+                    st.metric(label="BRAND",
+                              value=unique_brand_count)
                                 
                 
                 st.write("\n\n\n\n")
@@ -139,8 +139,8 @@ if password_input:
                 data_for_trend[['Mese', 'Anno']] = data_for_trend['Periodo'].str.split("/", expand=True)
 
                 # Visualizza la tabella per confermare le modifiche
-                with st.sidebar.expander("Visualizza Tabella Unpivot"):
-                    st.dataframe(data_for_trend)
+                #with st.sidebar.expander("Visualizza Tabella Unpivot"):
+                #    st.dataframe(data_for_trend)
 
 
 
@@ -160,7 +160,7 @@ if password_input:
                 data_top_10 = data_top_10.sort_values('Periodo')
 
                 # Aggiungi un widget per scegliere il tipo di grafico
-                tipo_grafico = st.radio("Seleziona il tipo di visualizzazione:", ['Linea_fatturato', 'Bar_fatturato'])
+                tipo_grafico = st.radio("Seleziona il tipo di visualizzazione:", ['Linea_fatturato', 'Bar_fatturato'], horizontal=True)
 
                 # Filtra i dati per i primi 10 brand
                 data_top_10 = data_aggregated[data_aggregated['Brand'].isin(top_10_brands)]
@@ -219,7 +219,7 @@ if password_input:
 
 
                 
-                st.header("ANALISI VOLUMI DI VENDITA")
+                st.header("ANALISI UNITA' VENDUTE")
                 with st.expander("VISUALIZZAZIONE UNITS"):
                     st.dataframe(df_selezionato_units, use_container_width=True)
 
@@ -239,8 +239,8 @@ if password_input:
                 data_for_trend_units[['Mese', 'Anno']] = data_for_trend_units['Periodo'].str.split("/", expand=True)
 
                 # Visualizza la tabella per confermare le modifiche
-                with st.sidebar.expander("Visualizza Tabella Unpivot"):
-                    st.dataframe(data_for_trend_units)
+                #with st.sidebar.expander("Visualizza Tabella Unpivot"):
+                #    st.dataframe(data_for_trend_units)
 
 
 
@@ -260,7 +260,7 @@ if password_input:
                 data_top_10_units = data_top_10_units.sort_values('Periodo')
 
                 # Aggiungi un widget per scegliere il tipo di grafico
-                tipo_grafico_units = st.radio("Seleziona il tipo di visualizzazione:", ['Linea_units', 'Bar_units'])
+                tipo_grafico_units = st.radio("Seleziona il tipo di visualizzazione:", ['Linea_units', 'Bar_units'], horizontal=True)
 
                 # Filtra i dati per i primi 10 brand
                 data_top_10_units = data_aggregated_units[data_aggregated_units['Brand'].isin(top_10_brands_units)]
@@ -281,7 +281,7 @@ if password_input:
 
 
 
-                    # Estrai gli anni dai dati
+                # Estrai gli anni dai dati
                 data_for_trend_units['Anno'] = pd.to_datetime(data_for_trend_units['Periodo']).dt.year
                 anni_unici_units = sorted(data_for_trend_units['Anno'].unique())
 
@@ -325,12 +325,135 @@ if password_input:
 
 
 
+                #GRAFICO PER FARE ASP PER BRAND
+
+
+                st.header("ANALISI AVERAGE SELLING PRICE")
+
+               # Aggregazione dei dati
+                total_per_brand_fatturato = data_for_trend.groupby(['Brand','Anno'])['Total'].sum().reset_index()
+                total_per_brand_units = data_for_trend_units.groupby(['Brand', 'Anno'])['Total'].sum().reset_index()
+
+                # Merge delle tabelle
+                combined_data = pd.merge(total_per_brand_fatturato, total_per_brand_units, on=['Brand', 'Anno'], suffixes=('_fatturato', '_units'))
+
+                # Calcolo dell'ASP
+                combined_data['ASP'] = combined_data['Total_fatturato'] / combined_data['Total_units']
+
+                media_asp_totale = round(combined_data['ASP'].mean(),2)
+
+                col5,col6,col7,col8,col9,col10=st.columns(6)
+
+                with col5:
+                    st.metric(label="Total Market ASP", value=f"{media_asp_totale} €")
+
+
+
+                # Filtro per anno
+                anni_unici_combinato = sorted(combined_data['Anno'].unique())
+                anno_selezionato_combinato = st.radio("Seleziona un Anno (ASP):", options=anni_unici_combinato, horizontal=True)
+
+                # Filtrare i dati in base all'anno selezionato
+                combined_data_filtered = combined_data[combined_data['Anno'] == anno_selezionato_combinato]
+
+                # Determina i primi 10 brand per fatturato totale nell'anno selezionato
+                top_10_brands = combined_data_filtered.nlargest(10, 'Total_fatturato')
+
+                # Creazione di un grafico a barre per il fatturato
+                bar = go.Bar(x=top_10_brands['Brand'], y=top_10_brands['Total_fatturato'], name='Fatturato Totale', yaxis='y', offsetgroup=1)
+
+                # Creazione di un grafico a linee per l'ASP
+                line = go.Scatter(x=top_10_brands['Brand'], y=top_10_brands['ASP'], name='ASP', yaxis='y2', line=dict(color='red'), mode='lines+markers')
+
+                # Impostazioni del layout, inclusa l'asse Y secondaria
+                layout = go.Layout(
+                    title='Fatturato Totale e ASP dei Top 10 Brand',
+                    yaxis=dict(title='Fatturato Totale'),
+                    yaxis2=dict(title='ASP', overlaying='y', side='right'),
+                    xaxis=dict(title='Brand'),
+                    barmode='group'
+                )
+
+
+
+                # Combinazione dei grafici
+                fig_combinato = go.Figure(data=[bar, line], layout=layout)
+
+                # Visualizzazione del grafico
+                st.plotly_chart(fig_combinato, use_container_width=True)
+
+
 
 
 
                 # Visualizzazione della nuova tabella
                 st.header("DATABASE PRODOTTI")
                 st.dataframe(nuova_tabella, use_container_width=True)
+
+
+                # Assicurati che top_10_brands contenga solo i nomi dei brand
+                top_10_brand_names = top_10_brands['Brand'].tolist()
+
+                # Filtra nuova_tabella per i brand in top_10_brand_names
+                filtered_nuova_tabella = nuova_tabella[nuova_tabella['Brand'].isin(top_10_brand_names)]
+
+                # Conteggio delle occorrenze di Brand in nuova_tabella
+                conteggio_brand_nuova_tabella = filtered_nuova_tabella['Brand'].value_counts().reset_index()
+                conteggio_brand_nuova_tabella.columns = ['Brand', 'Conteggio']
+
+                # Seleziona i primi 10 Brand
+                top_10_brands_conteggio = conteggio_brand_nuova_tabella.head(10)
+
+                # Crea un grafico a barre
+                fig_conteggio_brand = px.bar(top_10_brands_conteggio, x='Brand', y='Conteggio', title='Conteggio prodotti dei Top 10 Brand per Fatturato')
+
+                # Visualizzazione del grafico
+                st.plotly_chart(fig_conteggio_brand, use_container_width=True)
+
+
+
+                # Funzione per convertire in numerico, gestendo errori
+                def safe_convert_to_numeric(series):
+                    return pd.to_numeric(series, errors='coerce')
+
+                # Converti le colonne in valori numerici
+                filtered_nuova_tabella['Ratings'] = safe_convert_to_numeric(filtered_nuova_tabella['Ratings'])
+                filtered_nuova_tabella['Review count'] = safe_convert_to_numeric(filtered_nuova_tabella['Review count'])
+                filtered_nuova_tabella['Images'] = safe_convert_to_numeric(filtered_nuova_tabella['Images'])
+                filtered_nuova_tabella['Variation count'] = safe_convert_to_numeric(filtered_nuova_tabella['Variation count'])
+
+                # Calcolo delle medie
+                media_ratings = filtered_nuova_tabella.groupby('Brand')['Ratings'].mean().reset_index()
+                media_review_count = filtered_nuova_tabella.groupby('Brand')['Review count'].mean().reset_index()
+                media_images = filtered_nuova_tabella.groupby('Brand')['Images'].mean().reset_index()
+                media_variation_count = filtered_nuova_tabella.groupby('Brand')['Variation count'].mean().reset_index()
+
+                # Creazione dei grafici a barre orizzontali senza titolo in asse Y
+                fig_ratings = px.bar(media_ratings, y='Brand', x='Ratings', title='Media Ratings per i Top 10 Brand', orientation='h', labels={'Brand': ''})
+                fig_review_count = px.bar(media_review_count, y='Brand', x='Review count', title='Media Review Count per i Top 10 Brand', orientation='h', labels={'Brand': ''})
+                fig_images = px.bar(media_images, y='Brand', x='Images', title='Media Images per i Top 10 Brand', orientation='h', labels={'Brand': ''})
+                fig_variation_count = px.bar(media_variation_count, y='Brand', x='Variation count', title='Media Variation Count per i Top 10 Brand', orientation='h', labels={'Brand': ''})
+
+
+                st.subheader('Media KPIs')
+                # Visualizzazione dei grafici
+                col13, col14, col15, col16 = st.columns(4)
+                with col13:
+                    st.plotly_chart(fig_ratings, use_container_width=True)
+                with col14:
+                    st.plotly_chart(fig_review_count, use_container_width=True)
+                with col15:
+                    st.plotly_chart(fig_images, use_container_width=True)
+                with col16:
+                    st.plotly_chart(fig_variation_count, use_container_width=True)
+
+
+
+
+
+
+
+
 
 
                 # Unisci i DataFrame sulla colonna 'ASIN'
@@ -341,18 +464,24 @@ if password_input:
                 
                 # Crea un grafico a barre
                 fig_fulfillment = px.histogram(data_combinata, x='Fulfillment', y='Somma', color='Fulfillment', title='Fatturato per Fulfillment')
-                st.plotly_chart(fig_fulfillment, use_container_width=True)
                 
                 
-                # Calcola il conteggio per ciascun valore in "Buy Box"
-                conteggio_buy_box = nuova_tabella['Buy Box'].value_counts().reset_index()
-                conteggio_buy_box.columns = ['Buy Box', 'Conteggio']
+                # Calcolo del conteggio per ogni valore di Fulfillment
+                conteggio_fulfillment = data_combinata['Fulfillment'].value_counts().reset_index()
+                conteggio_fulfillment.columns = ['Fulfillment', 'Conteggio']
 
-                # Seleziona i primi 20 valori
-                top_20_buy_box = conteggio_buy_box.head(20)
-                # Grafico a barre per i primi 20 valori in "Buy Box"
-                fig_buy_box_top_20 = px.bar(top_20_buy_box, x='Buy Box', y='Conteggio', text='Conteggio', title='Top 20 Valori per Buy Box')
-                st.plotly_chart(fig_buy_box_top_20, use_container_width=True)
+                # Crea un grafico a barre per mostrare il conteggio
+                fig_conteggio_fulfillment = px.bar(conteggio_fulfillment, x='Fulfillment', y='Conteggio',
+                                                title='Conteggio per Fulfillment', 
+                                                labels={'Conteggio': 'Numero di Occorrenze'})
+
+                
+                col11, col12 = st.columns(2)
+                with col11:
+                    st.plotly_chart(fig_fulfillment, use_container_width=True)
+                with col12:
+                    st.plotly_chart(fig_conteggio_fulfillment, use_container_width=True)
+            
 
 
 
@@ -369,6 +498,20 @@ if password_input:
                 
                 with F:
                     st.plotly_chart(fig_subcategory, use_container_width=True)
+            
+                # Estrai i valori dalla colonna 'Product'
+                text = " ".join(descrizione for descrizione in nuova_tabella.Product if isinstance(descrizione, str))
+
+                # Creazione della Word Cloud con una risoluzione maggiore
+                wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+
+                # Visualizza la Word Cloud usando Matplotlib
+                plt.figure(figsize=(8, 4))  # Aumenta le dimensioni del plot
+                plt.imshow(wordcloud, interpolation='bilinear')
+                plt.axis("off")
+
+                # Mostra la word cloud in Streamlit
+                st.pyplot(plt)
 
 
 
