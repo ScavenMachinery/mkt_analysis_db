@@ -502,7 +502,7 @@ if password_input:
                 
 
                 # Widget per la selezione del filtro
-                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Solo Top 10 Brand per Fatturato"])
+                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Top 10 Brand per Fatturato"], orientation='h')
 
                 # Preparazione del testo per la Word Cloud
                 if opzione_wc == "Solo Top 10 Brand per Fatturato":
