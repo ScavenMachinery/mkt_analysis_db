@@ -41,7 +41,7 @@ password_input = st.sidebar.text_input("Inserisci la password", type="password")
 if password_input:
     if password_input == password_segreta:
         # Create a connection object.
-        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
         # Chiedi all'utente il nome del foglio
         sheet_name = st.sidebar.text_input("Inserisci il nome del foglio:")
