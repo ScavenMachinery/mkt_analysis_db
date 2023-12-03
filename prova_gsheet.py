@@ -500,9 +500,12 @@ if password_input:
                     st.plotly_chart(fig_subcategory, use_container_width=True)
             
                 
-
+                st.write("\n\n\n\n")
+                    
                 # Widget per la selezione del filtro
-                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Top 10 Brand per Fatturato"],horizontal=True)
+                st.subheader('ANALISI WORD CLOUD')
+                st.write("\n\n\n\n")
+                opzione_wc = st.radio("Genera nuvola per:", ["Tutti i Prodotti", "Top 10 Brand per Fatturato"],horizontal=True)
                 
                 if opzione_wc == "Top 10 Brand per Fatturato":
                     # Estrai i nomi dei top 10 brand
