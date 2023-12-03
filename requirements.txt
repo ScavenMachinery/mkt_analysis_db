@@ -5,6 +5,6 @@ streamlit
 st-gsheets-connection
 git+https://github.com/streamlit/gsheets-connection
 pandasql  # this is for example/st_app.py only
-matplotlib.pyplot
+matplotlib
 wordcloud
 streamlit_extras
