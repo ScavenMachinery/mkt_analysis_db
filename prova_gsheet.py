@@ -502,9 +502,9 @@ if password_input:
                 
 
                 # Widget per la selezione del filtro
-                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Solo Top 10 Brand per Fatturato"])
+                opzione_wc = st.radio("Genera Word Cloud per:", ["Tutti i Prodotti", "Top 10 Brand per Fatturato"],horizontal=True)
                 
-                if opzione_wc == "Solo Top 10 Brand per Fatturato":
+                if opzione_wc == "Top 10 Brand per Fatturato":
                     # Estrai i nomi dei top 10 brand
                     top_10_brand_names = top_10_brands['Brand'].tolist()
                 
