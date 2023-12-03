@@ -1,6 +1,6 @@
-Pillow==10.1.0
-plotly==5.14.1
-openpyxl==3.1.2
-streamlit==1.22
+Pillow
+plotly
+openpyxl
+streamlit
 https://github.com/streamlit/gsheets-connection
 pandasql  # this is for example/st_app.py only
