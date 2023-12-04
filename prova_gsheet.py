@@ -387,8 +387,9 @@ if password_input:
 
 
                 # Visualizzazione della nuova tabella
-                st.header("DATABASE PRODOTTI")
-                st.dataframe(nuova_tabella, use_container_width=True)
+                st.subheader('DATABASE PRODOTTI')
+                st.expander("VISUALIZZAZIONE DATABASE")
+                        st.dataframe(nuova_tabella, use_container_width=True)
 
 
                 # Assicurati che top_10_brands contenga solo i nomi dei brand
