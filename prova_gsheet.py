@@ -27,7 +27,7 @@ st.sidebar.image(image, width=250)
 st.image(image_title,use_column_width=True)
 
 st.title("ANALISI DI MERCATO 2 ANNI")
-st.markdown("_source.h v.1.0_")
+#st.markdown("_source.h v.1.0_")
 
 #nascondere dalla pagina la scritta "made with streamlit"
 hide_style = """
