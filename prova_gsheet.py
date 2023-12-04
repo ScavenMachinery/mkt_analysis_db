@@ -388,7 +388,7 @@ if password_input:
 
                 # Visualizzazione della nuova tabella
                 st.subheader('DATABASE PRODOTTI')
-                st.expander("VISUALIZZAZIONE DATABASE")
+                with st.expander("VISUALIZZAZIONE DATABASE"):
                         st.dataframe(nuova_tabella, use_container_width=True)
 
 
