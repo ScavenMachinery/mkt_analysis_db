@@ -79,12 +79,12 @@ if password_input:
                 df.dropna(how='all', axis=1, inplace=True)  # Rimuove colonne vuote
                 df.dropna(how='all', axis=0, inplace=True)  # Rimuove righe vuote
 
-                colonne_selezionate_fatturato = ['Product', 'ASIN', 'Brand'] + df.columns[51:76].tolist()
+                colonne_selezionate_fatturato = ['Product', 'ASIN', 'Brand'] + df.columns[50:74].tolist()
                 df_selezionato_fatturato = df[colonne_selezionate_fatturato]
                 # Inserisci la colonna Somma dopo 'Brand' per fatturato
                 df_selezionato_fatturato.insert(3, 'Somma', df_selezionato_fatturato.iloc[:, 3:].sum(axis=1))
 
-                colonne_selezionate_units = ['Product', 'ASIN', 'Brand'] + df.columns[26:51].tolist()
+                colonne_selezionate_units = ['Product', 'ASIN', 'Brand'] + df.columns[26:50].tolist()
                 df_selezionato_units = df[colonne_selezionate_units]
                 # Inserisci la colonna Somma dopo 'Brand' per units
                 df_selezionato_units.insert(3, 'Somma', df_selezionato_units.iloc[:, 3:].sum(axis=1))
